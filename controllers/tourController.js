@@ -49,7 +49,8 @@ exports.getTours = async (req, res) => {
 exports.getTour = async (req, res) => {
   //url must be = 127.0.0.1:3000/api/v1/tours/3
   try {
-    const id = req.params.id;
+    // const id = req.params.id;
+    const { id } = req.params;
     const tour = await Tour.findById(id);
     return res.status(200).json({
       status: 'success',
@@ -81,19 +82,40 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.editTour = (req, res) => {
-  return res.status(200).json({
-    status: 'success',
-    data: {
-      tour: `<Updated tour here...>`,
-    },
-  });
+exports.editTour = async (req, res) => {
+  try {
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        tour,
+      },
+    });
+  } catch (error) {
+    return res.status(404).json({
+      status: 'fail',
+      message: error,
+    });
+  }
 };
 
-exports.deleteTour = (req, res) => {
-  const tourId = req.params.id;
-  return res.status(204).json({
-    status: 'sucess',
-    data: null,
-  });
+exports.deleteTour = async (req, res) => {
+  // const tourId = req.params.id;
+  const { id } = req.params;
+  try {
+    const tour = await Tour.findByIdAndRemove(id);
+    return res.status(204).json({
+      status: 'sucess',
+      data: null,
+    });
+  } catch (error) {
+    return res.status(404).json({
+      status: 'sucess',
+      message: error,
+    });
+  }
 };
