@@ -28,8 +28,9 @@ exports.checkData = (req, res, next) => {
 exports.getTours = async (req, res) => {
   // console.log(req.requestTime);
   //response in jsend format
+  const filter = req.filter || {};
   try {
-    const tours = await Tour.find({});
+    const tours = await Tour.find(filter);
     return res.status(200).json({
       status: 'success',
       requestTime: req.requestTime,
@@ -118,4 +119,11 @@ exports.deleteTour = async (req, res) => {
       message: error,
     });
   }
+};
+
+//MIDDLEWARE TO PREPARE FILTER
+exports.filterTour = async (req, res, next) => {
+  if (!req.query) next();
+  req.filter = { ...req.query };
+  next();
 };
