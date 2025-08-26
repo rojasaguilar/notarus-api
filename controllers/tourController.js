@@ -1,5 +1,6 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
+const { queryObjects } = require('v8');
 
 //MIDDLEWARE
 // exports.checkId = (req, res, next, value) => {
@@ -28,9 +29,9 @@ exports.checkData = (req, res, next) => {
 exports.getTours = async (req, res) => {
   // console.log(req.requestTime);
   //response in jsend format
-  const filter = req.filter || {};
+
   try {
-    const tours = await Tour.find(filter);
+    const tours = await Tour.find(req.queryObject);
     return res.status(200).json({
       status: 'success',
       requestTime: req.requestTime,
@@ -123,7 +124,11 @@ exports.deleteTour = async (req, res) => {
 
 //MIDDLEWARE TO PREPARE FILTER
 exports.filterTour = async (req, res, next) => {
+  //MIDDLEWARE to SEPARATE the QUERY DATA from the SPETIAL VALUES
+  // FOR PAGINATION, LIMITS, SORTS, ETC
   if (!req.query) next();
-  req.filter = { ...req.query };
+  req.queryObject = { ...req.query }; // take the original req.query and create a copy
+  const excludedFields = ['page', 'sort', 'limit', 'fields']; //fields to exclude
+  excludedFields.forEach((el) => delete req.queryObject[el]); //exclude special values from de queryObject
   next();
 };
