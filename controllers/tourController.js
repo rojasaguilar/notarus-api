@@ -1,6 +1,5 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
-const { queryObjects } = require('v8');
 
 //MIDDLEWARE
 // exports.checkId = (req, res, next, value) => {
@@ -126,9 +125,21 @@ exports.deleteTour = async (req, res) => {
 exports.filterTour = async (req, res, next) => {
   //MIDDLEWARE to SEPARATE the QUERY DATA from the SPETIAL VALUES
   // FOR PAGINATION, LIMITS, SORTS, ETC
-  if (!req.query) next();
-  req.queryObject = { ...req.query }; // take the original req.query and create a copy
-  const excludedFields = ['page', 'sort', 'limit', 'fields']; //fields to exclude
-  excludedFields.forEach((el) => delete req.queryObject[el]); //exclude special values from de queryObject
-  next();
+  if (!req.query) return next();
+  // take the original req.query and create a copy
+  req.queryObject = { ...req.query };
+
+  //fields to exclude
+  const excludedFields = ['page', 'sort', 'limit', 'fields'];
+  excludedFields.forEach((el) => delete req.queryObject[el]);
+
+  //ADVANCE FILTERING
+
+  //GENEERATE A STRING FROM THE req.queryObject
+  let queryStr = JSON.stringify(req.queryObject);
+  //REPLACE WITH A REGULAR EXPRESION
+  queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
+  //req.queryObject now will be the queryStr parsed to JSON
+  req.queryObject = JSON.parse(queryStr);
+  return next();
 };
