@@ -30,7 +30,41 @@ exports.getTours = async (req, res) => {
   //response in jsend format
 
   try {
-    const tours = await Tour.find(req.queryObject);
+    //SAVE THE QUERY TO BE ABLE TO MODIFY IT
+    let query = Tour.find(req.queryObject);
+
+    //IF THERE IS A SORT REQUEST, THEN MODIFY THE QUERY TO SORT RESULTS
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+      // sort('price ratingAverage')
+    } else {
+      query = query.sort('-createdAt');
+    }
+
+    //TO SORT FIELDS
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+      query = query.select(fields);
+    } else {
+      query = query.select('-__v');
+    }
+
+    //PAGINATION
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    //VALIDATE IF REQUESTED PAGE EXISTS
+    if (req.query.page) {
+      const numTours = await Tour.countDocuments();
+      if (skip >= numTours) throw new Error('This page does not exists');
+    }
+
+    //EXECUTE THE QUERY
+    const tours = await query;
     return res.status(200).json({
       status: 'success',
       requestTime: req.requestTime,
@@ -126,6 +160,7 @@ exports.filterTour = async (req, res, next) => {
   //MIDDLEWARE to SEPARATE the QUERY DATA from the SPETIAL VALUES
   // FOR PAGINATION, LIMITS, SORTS, ETC
   if (!req.query) return next();
+  // console.log(req.query)
   // take the original req.query and create a copy
   req.queryObject = { ...req.query };
 
@@ -135,11 +170,16 @@ exports.filterTour = async (req, res, next) => {
 
   //ADVANCE FILTERING
 
-  //GENEERATE A STRING FROM THE req.queryObject
+  //GENERATE A STRING FROM THE req.queryObject
   let queryStr = JSON.stringify(req.queryObject);
   //REPLACE WITH A REGULAR EXPRESION
   queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
   //req.queryObject now will be the queryStr parsed to JSON
   req.queryObject = JSON.parse(queryStr);
+
+  //SORTING
+  // if(req.query.sort){
+  //   req.queryObject =
+  // }
   return next();
 };
