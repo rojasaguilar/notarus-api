@@ -8,7 +8,8 @@ const tourController = require('../controllers/tourController');
 
 router
   .route('/')
-  .get(tourController.filterTour, tourController.getTours)
+  // .get(tourController.filterTour, tourController.getTours)
+  .get(tourController.getTours)
   .post(tourController.checkData, tourController.createTour);
 //Main route is '/api/v1/tours', thats why here it's declared only '/'
 
