@@ -24,6 +24,15 @@ exports.checkData = (req, res, next) => {
   next();
 };
 
+
+//alias for some the most requested 
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = '5';
+  req.query.sort = '-ratingsAverage,price';
+  req.query.fields = 'name,price,ratingsAverage,summary,difficulty';
+  next();
+};
+
 //ROUTES
 exports.getTours = async (req, res) => {
   // console.log(req.requestTime);
