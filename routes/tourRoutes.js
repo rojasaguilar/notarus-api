@@ -13,6 +13,8 @@ router
   .post(tourController.checkData, tourController.createTour);
 //Main route is '/api/v1/tours', thats why here it's declared only '/'
 
+router.route('/tour-stats').get(tourController.getTourStats);
+
 //alias for some the most requested
 router
   .route('/top-5-cheap')
