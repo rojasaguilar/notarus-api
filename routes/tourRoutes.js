@@ -14,6 +14,7 @@ router
 //Main route is '/api/v1/tours', thats why here it's declared only '/'
 
 router.route('/tour-stats').get(tourController.getTourStats);
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 //alias for some the most requested
 router
