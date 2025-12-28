@@ -50,6 +50,10 @@ const tourSchema = new mongoose.Schema(
       select: false,
     },
     startDates: [Date],
+    secretTour: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     toJSON: { virtuals: true },
@@ -86,5 +90,32 @@ tourSchema.post('save', (doc, next) => {
   next();
 });
 */
+
+//QUERY MIDDLEWARE
+
+//TRIGGERS BEFORE FIND IS EXECUTED
+// THE QUERY ITSELF IS PROCESSED, NOT THE DOCUMENT
+// DOES NOT WORK ON FINDONE
+// tourSchema.pre('find', function (next) {
+//   //this HERE IS A QUERY OBJECT
+//   this.find({ secretTour: { $ne: true } });
+//   next();
+// });
+
+//TO BE ABLE TO USE IN ALL FIND QUERIES (findOne, findById, etc)
+// USE A REGEX
+tourSchema.pre(/^find/, function (next) {
+  //this HERE IS A QUERY OBJECT
+  this.find({ secretTour: { $ne: true } });
+
+  this.start = Date.now();
+  next();
+});
+
+tourSchema.post(/^find/, function (docs, next) {
+  console.log(`Query took ${Date.now() - this.start} milliseconds`);
+  // console.log(docs);
+  next();
+});
 
 module.exports = mongoose.model('Tour', tourSchema);
