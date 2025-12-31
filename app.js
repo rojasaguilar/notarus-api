@@ -1,6 +1,13 @@
 const express = require('express');
 const morgan = require('morgan');
 
+//UTILS
+const AppError = require('./utils/appError');
+
+//ERROR CONTROLLER
+const globalErrorHandler = require('./controllers/errorController');
+
+//ROUTERS
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
@@ -25,11 +32,15 @@ app.use('/api/v1/users', userRouter);
 //3) MIDDLEWARE FOR NOT HANDLED ROUTES
 
 app.all('*', (req, res, next) => {
-  return res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on the server`,
-  });
+  // const err = new Error(`Can't find ${req.originalUrl} on the server`);
+  // err.status = 'fail';
+  // err.statusCode = 404;
+
+  next(new AppError(`Can't find ${req.originalUrl} on the server`, 404));
 });
+
+//ERROR MIDDLEWARE HANDLER
+app.use(globalErrorHandler);
 
 // EXPORTING APP SO IT CAN BE USED ON SERVER.JS
 module.exports = app;

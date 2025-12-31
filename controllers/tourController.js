@@ -82,23 +82,23 @@ exports.getTour = async (req, res) => {
   }
 };
 
-exports.createTour = async (req, res) => {
-  try {
-    const data = req.body;
-    const tour = await Tour.create(data);
-    return res.status(201).json({
-      status: 'success',
-      data: {
-        tour: tour,
-      },
-    });
-  } catch (error) {
-    return res.status(400).json({
-      status: 'fail',
-      message: error,
-    });
-  }
+const catchAsync = (fn) => (req, res, next) => {
+  // fn(req, res, next).catch((err) => next(err));
+
+  //version mas corta
+  fn(req, res, next).catch(next);
 };
+
+exports.createTour = catchAsync(async (req, res, next) => {
+  const data = req.body;
+  const tour = await Tour.create(data);
+  return res.status(201).json({
+    status: 'success',
+    data: {
+      tour,
+    },
+  });
+});
 
 exports.editTour = async (req, res) => {
   try {
