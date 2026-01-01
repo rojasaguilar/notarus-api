@@ -4,6 +4,7 @@ const APIFeatures = require('./../utils/apiFeatures.js').default;
 
 //UTILS
 const catchAsync = require('./../utils/catchAsync.js');
+const AppError = require('./../utils/appError.js');
 
 //MIDDLEWARE
 // exports.checkId = (req, res, next, value) => {
@@ -66,6 +67,9 @@ exports.getTour = catchAsync(async (req, res, next) => {
   // const id = req.params.id;
   const { id } = req.params;
   const tour = await Tour.findById(id);
+
+  if (!tour) throw new AppError(`Error with the id ${id} not found`, 404);
+
   return res.status(200).json({
     status: 'success',
     data: { tour },
@@ -84,10 +88,18 @@ exports.createTour = catchAsync(async (req, res, next) => {
 });
 
 exports.editTour = catchAsync(async (req, res, next) => {
-  const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+  const { id } = req.params;
+
+  const tour = await Tour.findByIdAndUpdate(id, req.body, {
     new: true,
     runValidators: true,
   });
+
+  if (!tour)
+    throw new AppError(
+      `Can not edit error with id: ${id} because was not found`,
+      404,
+    );
 
   return res.status(200).json({
     status: 'success',
@@ -102,6 +114,9 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
 
   const tour = await Tour.findByIdAndRemove(id);
+
+  if (!tour) throw new AppError(`Could not find error with id ${id}`);
+
   return res.status(204).json({
     status: 'sucess',
     data: null,
