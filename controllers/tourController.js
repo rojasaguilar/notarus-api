@@ -70,7 +70,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
 
   if (!tour) throw new AppError(`Error with the id ${id} not found`, 404);
 
-  return res.status(200).json({
+  res.status(200).json({
     status: 'success',
     data: { tour },
   });
