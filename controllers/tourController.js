@@ -1,6 +1,6 @@
 const fs = require('fs');
 const Tour = require('./../models/tourModel');
-const APIFeatures = require('./../utils/apiFeatures.js').default;
+const APIFeatures = require('./../utils/apiFeatures.js');
 
 //UTILS
 const catchAsync = require('./../utils/catchAsync.js');
