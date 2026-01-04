@@ -31,6 +31,7 @@ const userSchema = new mongoose.Schema({
     },
     select: false,
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -51,6 +52,24 @@ userSchema.methods.checkPassword = async function (
 ) {
   //because password select:false, we cant access this.password
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  if (!this.passwordChangedAt) return false;
+
+  //DIVIDE IT BECAUSE .getTime() returns MILLISECONDS
+  // CONVERT IT INTO A BASE 10 NUMBER
+  const changedTimestamp = parseInt(
+    this.passwordChangedAt.getTime() / 1000,
+    10,
+  );
+
+  console.log(changedTimestamp, JWTTimestamp);
+
+  //IF JWTTimestamp < changedTimestamp, means pass was change AFTER token CREATION
+  //IF FIRST JWT CREATION, THEN CHANGED PASSWORD, THEN NOT VALID
+  // SO TOKEN NO LONGER VALID
+  return JWTTimestamp < changedTimestamp;
 };
 
 module.exports = mongoose.model('User', userSchema);
