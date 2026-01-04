@@ -20,6 +20,10 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm: data.passwordConfirm,
   });
 
+  //FOR TESTING FORCE TO PASSWORD CHANGE ON CREATION
+  // TO VERIFY IF TOKEN SHOULD BE INVALID
+  // const newUser = await User.create(data);
+
   //CREATE A TOKEN
   //jwt.sign(payload,signature,options)
   //SIGNATURE MUST BE AT LEAST A 32 CHARACTER STRING
@@ -56,7 +60,6 @@ exports.login = catchAsync(async (req, res, next) => {
   //3) If  everything ok, send token to client
   const token = signToken({
     id: user._id,
-    email: user.email,
   });
 
   res.status(200).json({
@@ -79,11 +82,18 @@ exports.protect = catchAsync(async (req, res, next) => {
   //promisify COMING FROM util package (built in node.js)
   const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  console.log(decoded);
-
   //3) Check if user still exists
+  const currentUser = await User.findById(decoded.id);
+
+  if (!currentUser)
+    throw new AppError('Token no longer valid. Please log in again', 401);
 
   //4) Check if user changed passwords after the token was issued
 
+  if (currentUser.changedPasswordAfter(decoded.iat))
+    throw new AppError('Password changed. Please log in again', 401);
+
+  //GRANT ACCESS TO PROTECTED ROUTE
+  req.user = currentUser;
   next();
 });
