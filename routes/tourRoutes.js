@@ -28,7 +28,14 @@ router
   .route('/:id')
   .get(tourController.getTour)
   .patch(tourController.editTour)
-  .delete(tourController.deleteTour);
+  .delete(
+    authController.protect,
+    //NOT A MIDDLEWARE
+    //wrapper function that contais the acutal MIDDLEWARE
+    //By doing it this way, we can pass things trhough params
+    authController.restrictTo('admin', 'lead-guide'),
+    tourController.deleteTour,
+  );
 /*Main route is '/api/v1/tours', thats why here its neccessary to add the 
  portion of the url that contains the param*/
 

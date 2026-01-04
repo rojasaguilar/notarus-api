@@ -29,7 +29,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   //SIGNATURE MUST BE AT LEAST A 32 CHARACTER STRING
   const token = signToken({
     id: newUser._id,
-    email: newUser.email,
+    // email: newUser.email,
   });
 
   res.status(201).json({
@@ -97,3 +97,16 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+exports.restrictTo =
+  (...roles) =>
+  (req, res, next) => {
+    //roles is an array.
+    //are the params we pass on tourRoutes
+    if (!roles.includes(req.user.role))
+      next(
+        new AppError("You don't have permission to perfom this action!", 403),
+      );
+
+    next();
+  };
