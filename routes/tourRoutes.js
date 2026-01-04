@@ -3,13 +3,14 @@ const express = require('express');
 const router = express.Router();
 
 const tourController = require('../controllers/tourController');
+const authController = require('./../controllers/authController');
 
 // router.param('id', tourController.checkId);
 
 router
   .route('/')
   // .get(tourController.filterTour, tourController.getTours)
-  .get(tourController.getTours)
+  .get(authController.protect, tourController.getTours)
   .post(tourController.checkData, tourController.createTour);
 //Main route is '/api/v1/tours', thats why here it's declared only '/'
 
