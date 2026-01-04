@@ -68,7 +68,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const tour = await Tour.findById(id);
 
-  if (!tour) throw new AppError(`Error with the id ${id} not found`, 404);
+  if (!tour) throw new AppError(`Tour with the id ${id} not found`, 404);
 
   res.status(200).json({
     status: 'success',
