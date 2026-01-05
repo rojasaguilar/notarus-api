@@ -12,6 +12,20 @@ const signToken = (payload) => {
   });
 };
 
+const createSendToken = (user, statusCode, res) => {
+  const token = signToken({
+    id: user._id,
+  });
+
+  res.status(statusCode).json({
+    status: 'sucess',
+    token,
+    data: {
+      user,
+    },
+  });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const data = req.body;
 
@@ -29,18 +43,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   //CREATE A TOKEN
   //jwt.sign(payload,signature,options)
   //SIGNATURE MUST BE AT LEAST A 32 CHARACTER STRING
-  const token = signToken({
-    id: newUser._id,
-    // email: newUser.email,
-  });
-
-  res.status(201).json({
-    status: 'sucess',
-    token: token,
-    data: {
-      user: newUser,
-    },
-  });
+  createSendToken(newUser, 201, res);
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -60,14 +63,7 @@ exports.login = catchAsync(async (req, res, next) => {
     throw new AppError('Incorrect email or password', 401);
 
   //3) If  everything ok, send token to client
-  const token = signToken({
-    id: user._id,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    token,
-  });
+  createSendToken(user, 200, res);
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -186,9 +182,25 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // await user.save();
 
   //4) Log the user in, send JWT
-  const token = signToken(user._id);
-  res.status(200).json({
-    status: 'sucess',
-    token,
-  });
+  createSendToken(user, 200, res);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  //1) GET USER FROM COLLECTION
+
+  //the property is req.user.id and not _id
+  //Because change the name of _id on every query (not in the bd)
+  const user = await User.findById(req.user.id).select('+password');
+
+  //2) CONFIRM GIVEN PASSWORD IS CORRECT
+  if (!(await user.checkPassword(req.body.passwordCurrent, user.password)))
+    throw new AppError('Incorrect password', 401);
+
+  //3) UPDATE PASSWORD
+  user.password = req.body.password;
+  user.passwordConfirm = req.body.passwordConfirm;
+  await user.save();
+
+  //4 lOG USER IN
+  createSendToken(user, 200, res);
 });
