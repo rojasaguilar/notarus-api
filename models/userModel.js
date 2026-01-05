@@ -54,6 +54,16 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  //SOMETIMES, JWT CREATION IS FASTER THAN INSERT ON DB
+  // IF JWT CREATES FIRST AND THEN passwordChangedAt is lalter (greater) TOKEN NO VALID
+  //TO GARANTEE THAT TOKEN WOULD BE VALID ALWAYS, SUBSTRACT 1 SEC ON passswordChangedAt
+  this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
 userSchema.methods.checkPassword = async function (
   candidatePassword,
   userPassword,
