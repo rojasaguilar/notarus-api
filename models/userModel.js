@@ -42,6 +42,13 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: Date,
 });
 
+/*
+  MIDDLEWARES MIDDLEWARES MIDDLEWARES
+*/
+
+// -- pre('save')
+
+//TO ENCRYPT PASSWORD
 userSchema.pre('save', async function (next) {
   //ONLY RUN IF PASS WAS ACTUALLY MODIFY
   if (!this.isModified('password')) return next();
@@ -54,6 +61,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+//TO SET passwordChangedAt
 userSchema.pre('save', function (next) {
   if (!this.isModified('password') || this.isNew) return next();
 
@@ -64,6 +72,11 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+/*
+  METHODS METHODS METHODS
+*/
+
+//TO VERIFY CORRECT PASSWORD
 userSchema.methods.checkPassword = async function (
   candidatePassword,
   userPassword,

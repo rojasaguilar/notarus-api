@@ -43,6 +43,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   //CREATE A TOKEN
   //jwt.sign(payload,signature,options)
   //SIGNATURE MUST BE AT LEAST A 32 CHARACTER STRING
+  
   createSendToken(newUser, 201, res);
 });
 
@@ -63,6 +64,7 @@ exports.login = catchAsync(async (req, res, next) => {
     throw new AppError('Incorrect email or password', 401);
 
   //3) If  everything ok, send token to client
+
   createSendToken(user, 200, res);
 });
 
@@ -93,6 +95,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
+  console.log('from protected', req.user);
   next();
 });
 
@@ -116,11 +119,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email: req.body.email });
 
   if (!user) throw new AppError('Invalid email. Please try another one', 404);
-  //2) Generate the random token
 
+  //2) Generate the random token
   const resetToken = await user.createPasswordResetToken();
   //to save the changes made on the model (the reset token and the expireTime)
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 
   console.log(resetToken);
 
@@ -145,10 +148,10 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   } catch (error) {
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
     console.log(error);
-    throw new AppError('There was an error sending the email', 500);
+    return next(AppError('There was an error sending the email', 500));
   }
 });
 
@@ -182,6 +185,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   // await user.save();
 
   //4) Log the user in, send JWT
+
   createSendToken(user, 200, res);
 });
 
@@ -202,5 +206,6 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
 
   //4 lOG USER IN
+
   createSendToken(user, 200, res);
 });
