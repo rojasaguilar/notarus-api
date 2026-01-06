@@ -9,7 +9,6 @@ const filterObj = (obj, ...allowedFields) => {
     if (allowedFields.includes(key)) newObj[key] = obj[key];
   });
 
-  console.log(newObj);
   return newObj;
 };
 const getUsers = catchAsync(async (req, res, next) => {
@@ -38,6 +37,8 @@ const updateMe = catchAsync(async (req, res, next) => {
 
   //2) Update user document
 
+  // FITLER FOR ONLY THE SPECIFIED PROPERTIES
+  // IN THIS CASE, ONLY NAME AND EMAIL WOULD BE PERMITTED
   const data = filterObj(req.body, 'name', 'email');
 
   const updatedUser = await User.findByIdAndUpdate(req.user._id, data, {
@@ -51,6 +52,14 @@ const updateMe = catchAsync(async (req, res, next) => {
     data: {
       user: updatedUser,
     },
+  });
+});
+
+const deleteMe = catchAsync(async (req, res, next) => {
+  await User.findByIdAndUpdate(req.user._id, { active: false });
+
+  res.status(204).json({
+    status: 'success',
   });
 });
 
@@ -86,4 +95,5 @@ module.exports = {
   updateUser,
   deleteUser,
   updateMe,
+  deleteMe,
 };
