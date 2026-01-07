@@ -13,9 +13,34 @@ const signToken = (payload) => {
 };
 
 const createSendToken = (user, statusCode, res) => {
+  //CREATE TOKEN
   const token = signToken({
     id: user._id,
   });
+
+  //DEFINE COOKIE OPTIONS
+  const cookieOptions = {
+    //EXPIRATION OF THE COOKIE
+    expires: new Date(
+      //COOKIE EXPIRES IN (ENV VARIABLE)
+      //WE HAVE TO SPECIFY MILLISECONDS
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000,
+    ),
+    //secure: true, //THIS TELLS COOKIE TO WORK ON HTTPS, HTTP WONT WORK AND NOT RECOMENDED
+    httpOnly: true, //WITH THIS, COOKIE CANT BE MODIFY BY THE CLIENT (BROWSER)
+  };
+
+  //JUST TO TEST OVER HTTP
+  //THIS LINE INDICATES THAT IF IS IN PRODUCTION, ACTIVATE COOKIE ONLY TRAVELS ON HTTPS
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  //COCKIES TRAVELS IN ALL HTTP REQUESTS
+  //EVERY INTERACTION CLIENT-SERVER TRAVELS ALONG WITH COOCKIES
+  res.cookie('jwt', token, cookieOptions);
+
+  //remove the password from the output
+  //doesnt affect the schema
+  user.password = undefined;
 
   res.status(statusCode).json({
     status: 'sucess',
@@ -43,7 +68,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   //CREATE A TOKEN
   //jwt.sign(payload,signature,options)
   //SIGNATURE MUST BE AT LEAST A 32 CHARACTER STRING
-  
+
   createSendToken(newUser, 201, res);
 });
 
