@@ -1,5 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 
 //UTILS
 const AppError = require('./utils/appError');
@@ -17,6 +18,18 @@ const app = express();
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev')); //middleware to console.log(route entered and stats)
 }
+
+const limiter = rateLimit({
+  //100 requests from the same IP
+  max: 100,
+  //In one hour
+  windowMs: 60 * 60 * 1000,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+
+//if app RESTARTS, then the request count RESETS TOO
+app.use('/api', limiter);
+
 app.use(express.json()); //middleware to parse body (TO JSON)
 app.use(express.static(`${__dirname}/public`)); //MIDDLEWARE TO SERVE STATIC FILES
 
