@@ -1,3 +1,4 @@
+/* eslint-disable node/no-unsupported-features/es-syntax */
 const crypto = require('crypto');
 const { promisify } = require('util');
 const User = require('./../models/userModel');
@@ -6,12 +7,10 @@ const jwt = require('jsonwebtoken');
 const AppError = require('./../utils/appError');
 const sendEmail = require('./../utils/email');
 
-const signToken = (payload) => {
-  return jwt.sign({ ...payload }, process.env.JWT_SECRET, {
+const signToken = (payload) =>
+  jwt.sign({ ...payload }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-};
-
 const createSendToken = (user, statusCode, res) => {
   //CREATE TOKEN
   const token = signToken({
