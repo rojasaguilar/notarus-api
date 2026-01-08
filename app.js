@@ -2,6 +2,9 @@ const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+const hpp = require('hpp');
 
 //UTILS
 const AppError = require('./utils/appError');
@@ -46,6 +49,32 @@ app.use(
     limit: '10kb',
   }),
 ); //middleware to parse body (TO JSON)
+
+//Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+//Data sanitization against XSS
+// PREVENTS THAT USERS COULD INJECT HTML WITH JS
+// BY REMOVING HTML
+app.use(xss());
+
+// PREVENT PARAMETER POLLUTION
+// FOR DUPLICATE PARAMS, IT TAKES THE LAST ONE
+// url/resource?sort=duration&sort=price -> takes the last one (sort=price)
+app.use(
+  hpp({
+    //BUT NOT WITH THE WHITELIST
+    //ALLOW THIS PARAMS TO BE DUPLICATED
+    whitelist: [
+      'duration', // url/resource?duration=5&duration=9
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  }),
+);
 
 //SERVING STATIC FILES
 app.use(express.static(`${__dirname}/public`)); //MIDDLEWARE TO SERVE STATIC FILES

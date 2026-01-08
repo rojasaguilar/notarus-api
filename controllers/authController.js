@@ -80,7 +80,13 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   //2) Check if user exits && password is correct
+
+  //CAREFULL!!
+  //THIS CODE ALLOWS Injection
+  // "email" : {"$gt" : ""}
+  //ON BOOTRSAP (app.js) ADDED MIDDLEWARE FOR SANITIZATION
   const user = await User.findOne({ email }).select('+password');
+  console.log('tue use', user);
 
   //user.checkPassword is defined on the MODEL
   //we have to call it from the USER WE QUERY, NOT FROM THE SCHEMA INSTANCE
