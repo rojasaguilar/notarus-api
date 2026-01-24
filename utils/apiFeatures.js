@@ -19,6 +19,8 @@ class APIFeatures {
     //REPLACE WITH A REGULAR EXPRESION
     queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (match) => `$${match}`);
 
+    console.log(queryStr);
+
     //queryObj now will be the queryStr parsed to JSON
     queryObj = JSON.parse(queryStr);
     this.query = this.query.find(queryObj);
