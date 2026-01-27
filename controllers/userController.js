@@ -69,12 +69,18 @@ const getUser = (req, res) => {
     message: 'This route is not yet defined',
   });
 };
-const createUser = (req, res) => {
-  res.status(500).json({
-    status: 'error',
-    message: 'This route is not yet defined',
+
+const createUser = catchAsync(async (req, res) => {
+  const data = req.body;
+
+  const createdUser = await User.create(data);
+
+  res.status(201).json({
+    status: 'sucess',
+    data: createdUser,
   });
-};
+});
+
 const updateUser = (req, res) => {
   res.status(500).json({
     status: 'error',
