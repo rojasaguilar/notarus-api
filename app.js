@@ -15,6 +15,7 @@ const globalErrorHandler = require('./controllers/errorController');
 //ROUTERS
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewController = require('./routes/reviewRoutes');
 
 const app = express();
 
@@ -88,6 +89,7 @@ app.use((req, res, next) => {
 // 2) MIDDLEWARE FOR SPECIFIC ROUTES (MY ROUTERS)
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewController);
 
 //3) MIDDLEWARE FOR NOT HANDLED ROUTES
 
