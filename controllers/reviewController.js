@@ -5,8 +5,18 @@ const Tour = require('./../models/tourModel');
 const AppError = require('./../utils/appError');
 
 exports.getReviews = catchAsync(async (req, res) => {
+  let filter = {};
   const { tourId } = req.params;
-  const reviews = await Review.find({ tour: tourId });
+
+  if (tourId) {
+    const tourExists = await Tour.findById(tourId);
+
+    if (!tourExists) throw new AppError('Tour does not exists', 404);
+
+    filter = { tour: tourId };
+  }
+
+  const reviews = await Review.find(filter);
 
   res.status(200).json({
     status: 'Success',
@@ -21,8 +31,10 @@ exports.getReview = catchAsync(async (req, res) => {
 
   if (!review) throw new AppError(`Review with id: ${id} not found`, 404);
 
-  if (!review.tour === tourId)
-    throw new AppError(`Review for this tour does not exists`, 404);
+  if (tourId) {
+    if (!review.tour === tourId)
+      throw new AppError(`Review for this tour does not exists`, 404);
+  }
 
   res.status(200).json({
     status: 'Success',
