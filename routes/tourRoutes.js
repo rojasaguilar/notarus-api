@@ -4,13 +4,12 @@ const router = express.Router();
 
 const tourController = require('../controllers/tourController');
 const authController = require('./../controllers/authController');
-const reviewController = require('./../controllers/reviewController');
+const reviewRouter = require('./reviewRoutes');
 
-// router.param('id', tourController.checkId);
+router.use('/:tourId/reviews', reviewRouter);
 
 router
   .route('/')
-  // .get(tourController.filterTour, tourController.getTours)
   .get(authController.protect, tourController.getTours)
   .post(tourController.checkData, tourController.createTour);
 //Main route is '/api/v1/tours', thats why here it's declared only '/'
@@ -37,16 +36,6 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTour,
   );
-
-router
-  .route('/:tourId/reviews')
-  .post(
-    authController.protect,
-    authController.restrictTo('user'),
-    reviewController.createReview,
-  )
-  .get(reviewController.getReviews);
-
 /*Main route is '/api/v1/tours', thats why here its neccessary to add the 
  portion of the url that contains the param*/
 

@@ -16,10 +16,13 @@ exports.getReviews = catchAsync(async (req, res) => {
 });
 
 exports.getReview = catchAsync(async (req, res) => {
-  const { id } = req.params;
+  const { tourId, id } = req.params;
   const review = await Review.findById(id);
 
   if (!review) throw new AppError(`Review with id: ${id} not found`, 404);
+
+  if (!review.tour === tourId)
+    throw new AppError(`Review for this tour does not exists`, 404);
 
   res.status(200).json({
     status: 'Success',
@@ -32,14 +35,6 @@ exports.createReview = catchAsync(async (req, res) => {
 
   const { tourId } = req.params;
   const { _id } = req.user;
-
-  const userExists = await User.findById(_id);
-
-  if (!userExists)
-    throw new AppError(
-      `The creator of the review with the id: ${_id} does not exists`,
-      404,
-    );
 
   const tourExists = await Tour.findById(tourId);
 
