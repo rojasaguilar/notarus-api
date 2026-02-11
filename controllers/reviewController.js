@@ -5,7 +5,8 @@ const Tour = require('./../models/tourModel');
 const AppError = require('./../utils/appError');
 
 exports.getReviews = catchAsync(async (req, res) => {
-  const reviews = await Review.find();
+  const { tourId } = req.params;
+  const reviews = await Review.find({ tour: tourId });
 
   res.status(200).json({
     status: 'Success',
@@ -29,20 +30,24 @@ exports.getReview = catchAsync(async (req, res) => {
 exports.createReview = catchAsync(async (req, res) => {
   const data = req.body;
 
-  const { user, tour } = data;
+  const { tourId } = req.params;
+  const { _id } = req.user;
 
-  const userExists = await User.findById(user);
+  const userExists = await User.findById(_id);
 
   if (!userExists)
     throw new AppError(
-      `The creator of the review with the id: ${user} does not exists`,
+      `The creator of the review with the id: ${_id} does not exists`,
       404,
     );
 
-  const tourExists = await Tour.findById(tour);
+  const tourExists = await Tour.findById(tourId);
 
   if (!tourExists)
-    throw new AppError(`The tour with the id: ${tour} does not exists`, 404);
+    throw new AppError(`The tour with the id: ${_id} does not exists`, 404);
+
+  data.tour = tourId;
+  data.user = _id;
 
   const review = await Review.create(data);
 

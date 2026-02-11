@@ -4,6 +4,7 @@ const router = express.Router();
 
 const tourController = require('../controllers/tourController');
 const authController = require('./../controllers/authController');
+const reviewController = require('./../controllers/reviewController');
 
 // router.param('id', tourController.checkId);
 
@@ -36,6 +37,16 @@ router
     authController.restrictTo('admin', 'lead-guide'),
     tourController.deleteTour,
   );
+
+router
+  .route('/:tourId/reviews')
+  .post(
+    authController.protect,
+    authController.restrictTo('user'),
+    reviewController.createReview,
+  )
+  .get(reviewController.getReviews);
+
 /*Main route is '/api/v1/tours', thats why here its neccessary to add the 
  portion of the url that contains the param*/
 
